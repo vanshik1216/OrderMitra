@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OrderMitra - Sign Up</title>
+    <link rel="stylesheet" href="signup.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>OrderMitra</h1>
+            <p>Join us today!</p>
+        </header>
+        
+        <form id="signup-form">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+            
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+            
+            <label for="role">Role:</label>
+            <select id="role" name="role" required>
+                <option value="">Select a role</option>
+                <option value="customer">Customer</option>
+                <option value="restaurant-owner">Restaurant Owner</option>
+                <option value="delivery-driver">Delivery Driver</option>
+            </select>
+            
+            <button type="submit" class="btn" >Sign Up</button>
+        </form>
+        
+        <p>Already have an account? <a href="login.html">Log in</a></p>
+    </div>
+    <script>
+        <button onclick="window.location.href='Main.html'"></button>
+    </script>
+</body>
+</html>

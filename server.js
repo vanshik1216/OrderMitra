@@ -16,7 +16,9 @@ app.use(express.json());
 app.use(express.static(__dirname+"/public"))
 
 // Health check
-app.get("/", (req, res) => res.send("Food Delivery API is running 🚀"));
+app.get("/", (req, res) => {
+  res.sendFile(__dirname + "/public/Profile.html");
+});
 
 // mount modular routes
 app.use("/api", authRoutes);

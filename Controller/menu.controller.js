@@ -24,4 +24,25 @@ async function listRestaurants(req, res) {
     }
 }
 
+async function listRestaurants(req, res) {
+  if (req.user.role !== "user") return res.status(403).json({ message: "Forbidden" });
+
+  const { location } = req.query; // example: /api/restaurants?location=Delhi
+
+  try {
+    const where = location
+      ? { address: { contains: location, mode: "insensitive" } } // case-insensitive search
+      : {};
+
+    const restaurants = await prisma.restaurant.findMany({
+      where,
+      select: { id: true, name: true, address: true },
+    });
+
+    res.json({ restaurants });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+}
+
 module.exports = { getMenuForRestaurant, listRestaurants };

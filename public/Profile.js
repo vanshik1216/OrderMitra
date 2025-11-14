@@ -1,45 +1,53 @@
-const form = document.querySelector("#updateProfileForm");
+const form = document.getElementById("updateProfileForm");
+const token = localStorage.getItem("token");
 
-form.addEventListener("submit", async (e) => {   // fixed typo
-    e.preventDefault();
+if (!token) {
+    window.location.href = "login.html";
+}
 
-    const name = document.querySelector("#name").value;
-    const phone = document.querySelector("#phone").value;
-    const address = document.querySelector("#address").value;
-    const password = document.querySelector("#password").value;
+document.addEventListener("DOMContentLoaded", loadCustomerData);
 
-    const token = localStorage.getItem("token");
-    if(!token){
-        alert("Please login first");
-        window.location.href = "login.html";
-        return;
-    }
-
-    let data = {};
-    if(name !== undefined) data.name = name;
-    if(phone !== undefined) data.phone = phone;
-    if(address !== undefined) data.address = address;
-    if(password) data.password = password;
-
-    // console.log("Sending data:", data); // debug
-
-    const res = await fetch("http://localhost:6789/api/updateprofile", {
-        method: "PUT",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify(data)
+async function loadCustomerData() {
+    const res = await fetch("http://localhost:6789/api/customer/me", {
+        headers: { "Authorization": "Bearer " + token }
     });
 
     const result = await res.json();
-    // console.log("Response:", result);  // debug
 
-    if(result.success){
-        alert(result.message);
-        document.querySelector("#password").value = "";
-        
+    if (result.success) {
+        document.getElementById("email").value = result.user.email;
+        document.getElementById("name").value = result.user.name || "";
+        document.getElementById("address").value = result.user.address || "";
+        document.getElementById("phone").value = result.user.phone || "";
+    }
+}
+
+form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const userData = {
+        name: document.getElementById("name").value.trim(),
+        email: document.getElementById("email").value.trim(),
+        password: document.getElementById("password").value.trim(),
+        address: document.getElementById("address").value.trim(),
+        phone: document.getElementById("phone").value.trim(),
+    };
+
+    const res = await fetch("http://localhost:6789/api/customer/update", {
+        method: "PUT",
+        headers: {
+            "Authorization": "Bearer " + token,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(userData)
+    });
+
+    const result = await res.json();
+
+    if (result.success) {
+        localStorage.setItem("customerAddress", userData.address);
+        window.location.href = "CustomerDashboard.html";
     } else {
-        alert(result.message );
+        alert(result.message);
     }
 });

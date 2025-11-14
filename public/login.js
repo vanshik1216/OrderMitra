@@ -55,14 +55,19 @@ form.addEventListener("submit", async (e) => {
         }
 
         setTimeout(() => {
+            // if (result.user && result.user.role === "customer") {
+            //     window.location.href = "CustomerDashboard.html";
+            // } 
             if (result.user && result.user.role === "customer") {
-                window.location.href = "CustomerDashboard.html";
-            } 
+                window.location.href = "Profile.html";
+            }
+
+
             else if (result.user && result.user.role === "restaurant-owner") {
                 window.location.href = "RestaurantDashboard.html";
-            } 
+            }
             else {
-                window.location.href = "Main.html"; 
+                window.location.href = "Main.html";
             }
         }, 1500);
 

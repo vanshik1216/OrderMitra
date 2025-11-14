@@ -103,7 +103,13 @@ async function login(req, res) {
             return res.json({ success: false, message: "Invalid password" });
         }
 
-        const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: "1d" });
+        // const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: "1d" });
+        const token = jwt.sign(
+    { id: user.id, role: role },   // <---- FIX
+    JWT_SECRET,
+    { expiresIn: "1d" }
+);
+
 
         // return res.json({
         //     success: true,
@@ -130,4 +136,59 @@ async function login(req, res) {
     }
 }
 
-module.exports = { signup, login };
+async function updateCustomer(req, res) {
+    try {
+        const { name, email, password, address, phone } = req.body;
+
+        if (req.user.role !== "customer") {
+            return res.status(403).json({ success: false, message: "Access denied" });
+        }
+
+        // check duplicate email
+        const existing = await prisma.user.findUnique({ where: { email } });
+        if (existing && existing.id !== req.user.id) {
+            return res.status(409).json({ success: false, message: "Email already in use" });
+        }
+
+        const hashed = await bcrypt.hash(password, 10);
+
+        const updated = await prisma.user.update({
+            where: { id: req.user.id },
+            data: {
+                name,
+                email,
+                password: hashed,
+                address,
+                phone
+            }
+        });
+
+        return res.json({ success: true, message: "Profile updated", user: updated });
+
+    } catch (err) {
+        return res.json({ success: false, message: err.message });
+    }
+}
+async function getCustomerProfile(req, res) {
+    try {
+        if (req.user.role !== "customer") {
+            return res.status(403).json({ success: false, message: "Access denied" });
+        }
+
+        const user = await prisma.user.findUnique({
+            where: { id: req.user.id }
+        });
+
+        return res.json({ success: true, user });
+
+    } catch (err) {
+        return res.json({ success: false, message: err.message });
+    }
+}
+
+
+
+
+
+
+module.exports = { signup, login, updateCustomer, getCustomerProfile };

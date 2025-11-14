@@ -32,12 +32,19 @@ async function signup(req, res) {
         if (!email || !password || !role) {
             return res.json({ success: false, message: "All fields required" });
         }
+        const existingUser = await prisma.user.findUnique({
+            where: { email: email }
+        });
+        if (existingUser) {
+            return res.status(409).json({ message: "Email already registered" });
+        }
+
 
         const hashed = await bcrypt.hash(password, 10);
         let user;
         if (role === "customer") {
             user = await prisma.user.create({
-                data: { 
+                data: {
                     email,
                     password: hashed,
                     name: "",
@@ -47,9 +54,9 @@ async function signup(req, res) {
             });
         }
 
-        else if (role === "restaurant-owner") { 
+        else if (role === "restaurant-owner") {
             user = await prisma.restaurant.create({
-                data: { 
+                data: {
                     email,
                     password: hashed,
                     name: "New Restaurant",
@@ -58,7 +65,7 @@ async function signup(req, res) {
                 }
             });
         }
-     else {
+        else {
             return res.json({ success: false, message: "Invalid role" });
         }
 
@@ -79,9 +86,11 @@ async function login(req, res) {
         }
 
         let user = await prisma.user.findUnique({ where: { email } });
+        let role = "customer";
 
         if (!user) {
             user = await prisma.restaurant.findUnique({ where: { email } });
+            role = "restaurant-owner";
         }
 
         // If still not found
@@ -96,11 +105,24 @@ async function login(req, res) {
 
         const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: "1d" });
 
+        // return res.json({
+        //     success: true,
+        //     message: "Login successful",
+        //     token,
+        //     user
+        // });
         return res.json({
             success: true,
             message: "Login successful",
             token,
-            user
+            user: {
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                address: user.address,
+                phone: user.phone,
+                role: role,            // <-- THE FIX
+            }
         });
 
     } catch (err) {

@@ -19,24 +19,24 @@ document.addEventListener("DOMContentLoaded", async () => {
         const result = await res.json();
         console.log("Restaurant Profile:", result);
 
-        if (!result.success || !result.restaurant) {
+        if (result.success && result.restaurant) {
+
+            const r = result.restaurant;   // <-- NO req here
+
+            document.getElementById("name").value = r.name || "";
+            document.getElementById("email").value = r.email || "";
+            document.getElementById("address").value = r.address || "";
+            document.getElementById("phone").value = r.phone || "";
+        } 
+        else {
             alert(result.message || "Unable to load profile");
-            return;
         }
-
-        const r = result.restaurant;
-
-        document.getElementById("name").value = r.name || "";
-        document.getElementById("email").value = r.email || "";
-        document.getElementById("address").value = r.address || "";
-        document.getElementById("phone").value = r.phone || "";
 
     } catch (error) {
         console.error("Profile load error:", error);
         alert("Something went wrong loading profile.");
     }
 });
-
 
 
 // ------------------------------

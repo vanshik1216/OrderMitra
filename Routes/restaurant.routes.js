@@ -1,17 +1,37 @@
+// --------------------------
+// FILE: Routes/restaurant.routes.js
+// --------------------------
 const express = require("express");
 const router = express.Router();
-const { authenticate } = require("../Middleware/auth.middleware");
 
 const {
-    getMenu,
-    addMenuItem,
-    updateMenuItem,
-    deleteMenuItem
-} = require("../Controller/restaurant.menu.controller");
+    getRestaurantProfile,
+    updateRestaurant,
+    getRestaurantOrders,
+    addMenuItem
+} = require("../Controller/restaurant.controller");
 
-router.get("/", authenticate, getMenu);
-router.post("/add", authenticate, addMenuItem);
-router.put("/update/:id", authenticate, updateMenuItem);
-router.delete("/delete/:id", authenticate, deleteMenuItem);
+const { authenticate } = require("../Middleware/auth.middleware");
+
+// RESTAURANT PROFILE ROUTES
+router.get("/restaurant/me", authenticate, getRestaurantProfile);
+router.put("/restaurant/update", authenticate, updateRestaurant);
+
+// RESTAURANT ORDERS
+router.get("/restaurant/orders", authenticate, getRestaurantOrders);
+
+// RESTAURANT MENU
+router.get("/restaurant/menu", authenticate, async (req, res) => {
+    try {
+        const menu = await prisma.menuItem.findMany({
+            where: { restaurantId: req.user.id }
+        });
+        res.json({ success: true, menu });
+    } catch (err) {
+        res.json({ success: false, message: err.message });
+    }
+});
+
+router.post("/restaurant/menu/add", authenticate, addMenuItem);
 
 module.exports = router;

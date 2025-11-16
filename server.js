@@ -31,8 +31,8 @@ app.get("/", (req, res) => {
 app.use("/api", authRoutes);
 app.use("/api", ordersRoutes);
 // app.use("/api", restaurantRoutes);
-app.use("/api/restaurant", restaurantRoutes);
-app.use("/api/restaurant/menu", restaurantMenuRoutes);
+app.use("/api", restaurantRoutes);
+app.use("/api/menu", restaurantMenuRoutes);
 app.use("/api", menuRoutes);
 app.use("/api",updateRoutes)
 

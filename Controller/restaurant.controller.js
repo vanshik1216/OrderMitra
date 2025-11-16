@@ -6,6 +6,28 @@ const bcrypt = require("bcryptjs");
 
 
 // GET restaurant profile
+// async function getRestaurantProfile(req, res) {
+//     try {
+//         if (req.user.role !== "restaurant-owner") {
+//             return res.status(403).json({ success: false, message: "Access denied" });
+//         }
+
+//         const existing = await prisma.restaurant.findUnique({
+//     where: { email }
+// });
+
+// if (existing && existing.id !== req.user.id) {
+//     return res.status(409).json({ success: false, message: "Email already in use" });
+// }
+
+
+//         return res.json({ success: true, restaurant });
+
+//     } catch (err) {
+//         return res.json({ success: false, message: err.message });
+//     }
+// }
+
 async function getRestaurantProfile(req, res) {
     try {
         if (req.user.role !== "restaurant-owner") {
@@ -16,7 +38,7 @@ async function getRestaurantProfile(req, res) {
             where: { id: req.user.id }
         });
 
-        return res.json({ success: true, user });
+        return res.json({ success: true, restaurant });
 
     } catch (err) {
         return res.json({ success: false, message: err.message });
@@ -25,7 +47,54 @@ async function getRestaurantProfile(req, res) {
 
 
 
+
 // UPDATE RESTAURANT PROFILE
+// async function updateRestaurant(req, res) {
+//     try {
+//         const { name, email, password, address, phone } = req.body;
+
+//         if (req.user.role !== "restaurant-owner") {
+//             return res.status(403).json({ success: false, message: "Access denied" });
+//         }
+
+//         // Check duplicate email in restaurant table
+//         const existing = await prisma.restaurant.findUnique({
+//             where: { email }
+//         });
+
+//         if (existing && existing.id !== req.user.id) {
+//             return res
+//                 .status(409)
+//                 .json({ success: false, message: "Email already in use" });
+//         }
+
+//         // Hash password only if provided
+//         let hashedPassword = undefined;
+//         if (password && password.trim() !== "") {
+//             hashedPassword = await bcrypt.hash(password, 10);
+//         }
+
+//         const updated = await prisma.restaurant.update({
+//             where: { id: req.user.id },
+//             data: {
+//                 name,
+//                 email,
+//                 address,
+//                 phone,
+//                 ...(hashedPassword && { password: hashedPassword })
+//             }
+//         });
+
+//         return res.json({
+//             success: true,
+//             message: "Restaurant profile updated",
+//             restaurant: updated
+//         });
+
+//     } catch (err) {
+//         return res.json({ success: false, message: err.message });
+//     }
+// }
 async function updateRestaurant(req, res) {
     try {
         const { name, email, password, address, phone } = req.body;
@@ -34,18 +103,14 @@ async function updateRestaurant(req, res) {
             return res.status(403).json({ success: false, message: "Access denied" });
         }
 
-        // Check duplicate email in restaurant table
         const existing = await prisma.restaurant.findUnique({
             where: { email }
         });
 
         if (existing && existing.id !== req.user.id) {
-            return res
-                .status(409)
-                .json({ success: false, message: "Email already in use" });
+            return res.status(409).json({ success: false, message: "Email already in use" });
         }
 
-        // Hash password only if provided
         let hashedPassword = undefined;
         if (password && password.trim() !== "") {
             hashedPassword = await bcrypt.hash(password, 10);
@@ -56,9 +121,9 @@ async function updateRestaurant(req, res) {
             data: {
                 name,
                 email,
+                password: hashedPassword,
                 address,
-                phone,
-                ...(hashedPassword && { password: hashedPassword })
+                phone
             }
         });
 
@@ -72,6 +137,7 @@ async function updateRestaurant(req, res) {
         return res.json({ success: false, message: err.message });
     }
 }
+
 
 
 

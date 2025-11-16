@@ -6,25 +6,69 @@ if (!token) {
 }
 
 // ------------------------------
-// LOAD RESTAURANT DATA
+// LOAD RESTAURANT PROFILE
 // ------------------------------
-async function loadRestaurant() {
-    const res = await fetch("http://localhost:6789/api/restaurant/me", {
-        headers: { "Authorization": "Bearer " + token }
-    });
+async function loadRestaurantInfo() {
+    try {
+        const res = await fetch("http://localhost:6789/api/restaurant/me", {
+            headers: { "Authorization": "Bearer " + token }
+        });
 
-    const result = await res.json();
-    console.log("Restaurant:", result);
+        const result = await res.json();
+        console.log("Restaurant Profile:", result);
 
-    if (result.success) {
-        document.getElementById("restName").textContent = result.restaurant.name;
-        document.getElementById("restEmail").textContent = result.restaurant.email;
-        document.getElementById("restAddress").textContent = result.restaurant.address;
+        if (result.success) {
+            const r = result.restaurant;
+            document.getElementById("restName").innerText = r.name;
+            document.getElementById("restEmail").innerText = r.email;
+            document.getElementById("restAddress").innerText = r.address;
+        } else {
+            alert(result.message);
+        }
+
+    } catch (err) {
+        console.error(err);
+        alert("Failed to load restaurant information.");
     }
 }
 
-loadRestaurant();
+// ------------------------------
+// LOAD MENU ITEMS
+// ------------------------------
+async function loadMenu() {
+    const list = document.getElementById("menuList");
+    list.innerHTML = "<li>Loading menu...</li>";
 
+    try {
+        const res = await fetch("http://localhost:6789/api/restaurant/menu", {
+            headers: { "Authorization": "Bearer " + token }
+        });
+
+        const result = await res.json();
+        console.log("Menu:", result);
+
+        if (!result.success) {
+            list.innerHTML = `<li>Error loading menu</li>`;
+            return;
+        }
+
+        list.innerHTML = "";
+
+        result.menu.forEach(item => {
+            const li = document.createElement("li");
+            li.innerHTML = `
+                <strong>${item.name}</strong> - ₹${item.price}
+                <button onclick="editMenuItem(${item.id}, '${item.name}', ${item.price})" class="small-btn">Edit</button>
+                <button onclick="deleteMenuItem(${item.id})" class="small-btn danger">Delete</button>
+            `;
+            list.appendChild(li);
+        });
+
+    } catch (err) {
+        console.error(err);
+        list.innerHTML = `<li>Failed to load menu.</li>`;
+    }
+}
 
 // ------------------------------
 // ADD MENU ITEM
@@ -33,9 +77,9 @@ async function addMenuItem() {
     const name = document.getElementById("menuName").value;
     const price = document.getElementById("menuPrice").value;
 
-    if (!name || !price) return alert("Enter name and price!");
+    if (!name || !price) return alert("Please fill both fields");
 
-    const res = await fetch("http://localhost:6789/api/menu", {
+    const res = await fetch("http://localhost:6789/api/restaurant/menu/add", {
         method: "POST",
         headers: {
             "Authorization": "Bearer " + token,
@@ -45,86 +89,110 @@ async function addMenuItem() {
     });
 
     const result = await res.json();
-    alert(result.message);
-    loadMenu();
+
+    if (result.success) {
+        alert("Item added!");
+        document.getElementById("menuName").value = "";
+        document.getElementById("menuPrice").value = "";
+        loadMenu();
+    } else {
+        alert(result.message);
+    }
 }
 
-
 // ------------------------------
-// LOAD MENU ITEMS
+// EDIT MENU ITEM
 // ------------------------------
-async function loadMenu() {
-    const res = await fetch("http://localhost:6789/api/menu", {
-        headers: { "Authorization": "Bearer " + token }
-    });
+function editMenuItem(id, oldName, oldPrice) {
+    const newName = prompt("New Name:", oldName);
+    const newPrice = prompt("New Price:", oldPrice);
 
-    const result = await res.json();
-    const list = document.getElementById("menuList");
-    list.innerHTML = "";
+    if (!newName || !newPrice) return;
 
-    result.menu.forEach(item => {
-        const li = document.createElement("li");
-        li.innerHTML = `
-            ${item.name} - ₹${item.price}
-        `;
-        list.appendChild(li);
-    });
+    updateMenuItem(id, newName, newPrice);
 }
 
-loadMenu();
-
-
-// ------------------------------
-// LOAD ORDERS
-// ------------------------------
-async function loadOrders() {
-    const res = await fetch("http://localhost:6789/api/orders", {
-        headers: { "Authorization": "Bearer " + token }
-    });
-
-    const result = await res.json();
-    const list = document.getElementById("ordersList");
-    list.innerHTML = "";
-
-    result.orders.forEach(order => {
-        const li = document.createElement("li");
-        li.innerHTML = `
-            <strong>Order #${order.id}</strong><br>
-            Customer: ${order.user.email}<br>
-            Status: ${order.status}<br>
-            <button onclick="updateOrder(${order.id}, 'Preparing')">Preparing</button>
-            <button onclick="updateOrder(${order.id}, 'Delivered')">Delivered</button>
-        `;
-        list.appendChild(li);
-    });
-}
-
-loadOrders();
-
-
-// ------------------------------
-// UPDATE ORDER STATUS
-// ------------------------------
-async function updateOrder(id, status) {
-    const res = await fetch(`http://localhost:6789/api/orders/${id}`, {
+async function updateMenuItem(id, name, price) {
+    const res = await fetch(`http://localhost:6789/api/restaurant/menu/update/${id}`, {
         method: "PUT",
         headers: {
             "Authorization": "Bearer " + token,
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({ status })
+        body: JSON.stringify({ name, price })
     });
 
     const result = await res.json();
-    alert(result.message);
-    loadOrders();
+    if (result.success) {
+        alert("Menu item updated!");
+        loadMenu();
+    } else {
+        alert(result.message);
+    }
 }
 
+// ------------------------------
+// DELETE MENU ITEM
+// ------------------------------
+async function deleteMenuItem(id) {
+    if (!confirm("Delete this item?")) return;
+
+    const res = await fetch(`http://localhost:6789/api/restaurant/menu/delete/${id}`, {
+        method: "DELETE",
+        headers: { "Authorization": "Bearer " + token }
+    });
+
+    const result = await res.json();
+
+    if (result.success) {
+        alert("Item deleted!");
+        loadMenu();
+    } else {
+        alert(result.message);
+    }
+}
+
+// ------------------------------
+// LOAD ORDERS
+// ------------------------------
+async function loadOrders() {
+    const list = document.getElementById("ordersList");
+    list.innerHTML = "<li>Loading orders...</li>";
+
+    const res = await fetch("http://localhost:6789/api/restaurant/orders", {
+        headers: { "Authorization": "Bearer " + token }
+    });
+
+    const result = await res.json();
+    console.log("Orders:", result);
+
+    if (!result.success) {
+        list.innerHTML = "<li>Error loading orders</li>";
+        return;
+    }
+
+    list.innerHTML = "";
+
+    result.orders.forEach(order => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+            <strong>Order #${order.id}</strong> - ${order.user.name}
+            <br>Total Items: ${order.items.length}
+            <hr>
+        `;
+        list.appendChild(li);
+    });
+}
 
 // ------------------------------
 // LOGOUT
 // ------------------------------
-document.getElementById("logoutBtn").addEventListener("click", () => {
+document.getElementById("logoutBtn").onclick = () => {
     localStorage.removeItem("token");
     window.location.href = "login.html";
-});
+};
+
+// Load everything
+loadRestaurantInfo();
+loadMenu();
+loadOrders();

@@ -11,6 +11,7 @@ const ordersRoutes = require("./Routes/orders.routes");
 const restaurantRoutes = require("./Routes/restaurant.routes");
 const menuRoutes = require("./Routes/menu.routes");
 const updateRoutes=require("./Routes/UpdateRoutes")
+const restaurantMenuRoutes = require("./Routes/restaurant.menu.routes");
 const app = express();
 
 // Middleware
@@ -31,6 +32,7 @@ app.use("/api", authRoutes);
 app.use("/api", ordersRoutes);
 // app.use("/api", restaurantRoutes);
 app.use("/api/restaurant", restaurantRoutes);
+app.use("/api/restaurant/menu", restaurantMenuRoutes);
 app.use("/api", menuRoutes);
 app.use("/api",updateRoutes)
 

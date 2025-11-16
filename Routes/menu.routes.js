@@ -1,12 +1,23 @@
-// --------------------------
-// FILE: modules/menu/menu.routes.js
-// --------------------------
 const express = require("express");
 const router = express.Router();
-const { getMenuForRestaurant, listRestaurants } = require("../Controller/menu.controller");
 const { authenticate } = require("../Middleware/auth.middleware");
+const {
+    getMenu,
+    addMenuItem,
+    updateMenuItem,
+    deleteMenuItem
+} = require("../Controller/menu.controller");
 
-router.get("/restaurant/:id/menu", authenticate, getMenuForRestaurant);
-router.get("/restaurants", authenticate, listRestaurants);
+// GET all menu items for logged restaurant
+router.get("/", authenticate, getMenu);
+
+// Add a new item
+router.post("/add", authenticate, addMenuItem);
+
+// Update item
+router.put("/update/:id", authenticate, updateMenuItem);
+
+// Delete item
+router.delete("/delete/:id", authenticate, deleteMenuItem);
 
 module.exports = router;

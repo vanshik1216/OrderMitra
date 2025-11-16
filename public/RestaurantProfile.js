@@ -6,27 +6,37 @@ if (!token) {
 }
 
 // ------------------------------
-// LOAD RESTAURANT INFO
+// LOAD RESTAURANT PROFILE
 // ------------------------------
 document.addEventListener("DOMContentLoaded", async () => {
-    const res = await fetch("http://localhost:6789/api/restaurant/me", {
-        headers: {
-            "Authorization": "Bearer " + token
+    try {
+        const res = await fetch("http://localhost:6789/api/restaurant/me", {
+            headers: {
+                "Authorization": "Bearer " + token
+            }
+        });
+
+        const result = await res.json();
+        console.log("Restaurant Profile:", result);
+
+        if (!result.success || !result.restaurant) {
+            alert(result.message || "Unable to load profile");
+            return;
         }
-    });
 
-    const result = await res.json();
-    console.log("Restaurant Profile:", result);
+        const r = result.restaurant;
 
-    if (result.success) {
-        document.getElementById("name").value = result.restaurant.name || "";
-        document.getElementById("email").value = result.restaurant.email || "";
-        document.getElementById("address").value = result.restaurant.address || "";
-        document.getElementById("phone").value = result.restaurant.phone || "";
-    } else {
-        alert(result.message);
+        document.getElementById("name").value = r.name || "";
+        document.getElementById("email").value = r.email || "";
+        document.getElementById("address").value = r.address || "";
+        document.getElementById("phone").value = r.phone || "";
+
+    } catch (error) {
+        console.error("Profile load error:", error);
+        alert("Something went wrong loading profile.");
     }
 });
+
 
 
 // ------------------------------
@@ -42,8 +52,8 @@ document.getElementById("restaurantProfileForm")
     const address = document.getElementById("address").value.trim();
     const phone = document.getElementById("phone").value.trim();
 
-    if (!name || !email || !password || !address || !phone) {
-        return alert("All fields are required!");
+    if (!name || !email) {
+        return alert("Name and Email are required!");
     }
 
     const res = await fetch("http://localhost:6789/api/restaurant/update", {

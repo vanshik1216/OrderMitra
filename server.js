@@ -29,7 +29,8 @@ app.get("/", (req, res) => {
 // mount modular routes under /api
 app.use("/api", authRoutes);
 app.use("/api", ordersRoutes);
-app.use("/api", restaurantRoutes);
+// app.use("/api", restaurantRoutes);
+app.use("/api/restaurant", restaurantRoutes);
 app.use("/api", menuRoutes);
 app.use("/api",updateRoutes)
 

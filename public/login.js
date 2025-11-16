@@ -59,7 +59,7 @@ form.addEventListener("submit", async (e) => {
             //     window.location.href = "CustomerDashboard.html";
             // } 
             if (result.user && result.user.role === "customer") {
-                window.location.href = "Profile.html";
+                window.location.href = "CustomerDashboard.html";
             }
 
 

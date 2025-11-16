@@ -21,3 +21,21 @@ router.put("/update/:id", authenticate, updateMenuItem);
 router.delete("/delete/:id", authenticate, deleteMenuItem);
 
 module.exports = router;
+// const express = require("express");
+// const router = express.Router();
+
+// const {
+//     getMenuForRestaurant,
+//     listRestaurants,
+//     searchRestaurants
+// } = require("../Controller/menu.controller");
+
+// const { authenticate } = require("../Middleware/auth.middleware");
+
+// // CUSTOMER menu routes
+// router.get("/restaurants", authenticate, listRestaurants);
+// router.get("/restaurants/search", authenticate, searchRestaurants);
+// router.get("/restaurant/:id/menu", authenticate, getMenuForRestaurant);
+
+// module.exports = router;
+

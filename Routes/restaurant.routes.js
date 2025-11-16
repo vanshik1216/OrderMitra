@@ -10,6 +10,7 @@ const {
     getRestaurantOrders,
     addMenuItem
 } = require("../Controller/restaurant.controller");
+const { getMenu } = require("../Controller/restaurant.menu.controller");
 
 const { authenticate } = require("../Middleware/auth.middleware");
 
@@ -21,17 +22,17 @@ router.put("/restaurant/update", authenticate, updateRestaurant);
 router.get("/restaurant/orders", authenticate, getRestaurantOrders);
 
 // RESTAURANT MENU
-router.get("/restaurant/menu", authenticate, async (req, res) => {
-    try {
-        const menu = await prisma.menuItem.findMany({
-            where: { restaurantId: req.user.id }
-        });
-        res.json({ success: true, menu });
-    } catch (err) {
-        res.json({ success: false, message: err.message });
-    }
-});
-
+// router.get("/restaurant/menu", authenticate, async (req, res) => {
+//     try {
+//         const menu = await prisma.menuItem.findMany({
+//             where: { restaurantId: req.user.id }
+//         });
+//         res.json({ success: true, menu });
+//     } catch (err) {
+//         res.json({ success: false, message: err.message });
+//     }
+// });
+router.get("/restaurant/menu", authenticate, getMenu);
 router.post("/restaurant/menu/add", authenticate, addMenuItem);
 
 module.exports = router;

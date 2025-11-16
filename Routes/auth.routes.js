@@ -21,9 +21,8 @@ router.post("/login", login);
 
 // CUSTOMER PROFILE ROUTES
 console.log("authenticate:", authenticate);
-console.log("getCustomerProfile:", getCustomerProfile);
 
-router.get("/customer/me", authenticate, getCustomerProfile);
-router.put("/customer/update", authenticate, updateCustomer);
+
+
 
 module.exports = router;
